@@ -39,6 +39,10 @@ circle {
     </style>
   </head>
   <body>
+     <h2>
+      <span>Title</span>, 2008<br>
+      great arcs and symbol map
+    </h2>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
     <script type="text/javascript" src="d3/d3.geo.js"></script>
@@ -94,8 +98,8 @@ d3.csv("data/host-target2.csv", function(flights) {
       positions = [];
 
   var arc = d3.geo.greatArc()
-      .source(function(d) { return locationByAirport[d.source]; })
-      .target(function(d) { return locationByAirport[d.target]; });
+      .source(function(d) { return locationByAirport[d.Host]; })
+      .target(function(d) { return locationByAirport[d.Target]; });
 
   flights.forEach(function(flight) {
     var origin = flight.HostCode,
