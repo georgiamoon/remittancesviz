@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+  <title>Remittances</title>
     <link type="text/css" rel="stylesheet" href="style.css"/>
     <style type="text/css">
 
@@ -38,10 +39,6 @@ circle {
     </style>
   </head>
   <body>
-    <h2>
-      <span>U.S. commercial airports</span>, 2008<br>
-      great arcs and symbol map
-    </h2>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
     <script type="text/javascript" src="d3/d3.geo.js"></script>
@@ -89,7 +86,7 @@ d3.json("data/world-countries.json", function(collection) {
 
 });
 
-d3.csv("data/host-target.csv", function(flights) {
+d3.csv("data/host-target2.csv", function(flights) {
   var linksByOrigin = {},
       countByAirport = {},
       sumByAirport = {},
@@ -134,13 +131,13 @@ d3.csv("data/host-target.csv", function(flights) {
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
         .on("mouseover", function(d, i) { d3.select("h2 span").text(d.name); });
-/*
+
     g.selectAll("path.arc")
         .data(function(d) { return linksByOrigin[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
         .attr("d", function(d) { return path(arc(d)); });
-*/
+
 
     circles.selectAll("circle")
         .data(airports)
