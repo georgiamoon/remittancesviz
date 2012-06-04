@@ -15,6 +15,7 @@ path.arc {
   fill: none;
   stroke: #000;
   display: none;
+  stroke-width: 0.5;
 }
 
 path.cell {
@@ -104,8 +105,9 @@ d3.csv("data/host-target2.csv", function(flights) {
   flights.forEach(function(flight) {
     var origin = flight.HostCode,
         destination = flight.TargetCode,
+		amnt = flight.Amount,
         links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
-    links.push({source: origin, target: destination});
+    links.push({source: origin, target: destination, amount: parseInt(amnt)});
     countByAirport[origin] = (countByAirport[origin] || 0) + 1;
     sumByAirport[origin] = (sumByAirport[origin] || 0) + parseInt(flight.Amount);
     countByAirport[destination] = (countByAirport[destination] || 0) + 1;
@@ -140,8 +142,8 @@ d3.csv("data/host-target2.csv", function(flights) {
         .data(function(d) { return linksByOrigin[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
+		.attr("style", function(d){return "/'stroke-width/' =" + linksByOrigin[d.amount];})
         .attr("d", function(d) { return path(arc(d)); });
-//		.attr("style", "stroke-width");
 
 
     circles.selectAll("circle")
