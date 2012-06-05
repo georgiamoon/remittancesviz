@@ -41,8 +41,8 @@ circle {
   </head>
   <body>
      <h2>
-      <span>Title</span>, 2008<br>
-      great arcs and symbol map
+      Remittances from <span>Country</span><br>
+	  Data is in $USD, IFAD 2007<br>
     </h2>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
@@ -136,7 +136,7 @@ d3.csv("data/host-target2.csv", function(flights) {
     g.append("svg:path")
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
-        .on("mouseover", function(d, i) { d3.select("h2 span").text(d.name); });
+        .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
 
     g.selectAll("path.arc")
         .data(function(d) { return linksByOrigin[d.Code] || []; })
