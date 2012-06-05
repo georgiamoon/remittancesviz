@@ -142,9 +142,8 @@ d3.csv("data/host-target2.csv", function(flights) {
         .data(function(d) { return linksByOrigin[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
-		.attr("style", function(d){return "/'stroke-width/' =" + linksByOrigin[d.amount];})
-        .attr("d", function(d) { return path(arc(d)); });
-
+        .attr("d", function(d) { return path(arc(d)); })
+		.style("stroke-width", function(w) { return Math.sqrt(w.amount)*0.00005;} );
 
     circles.selectAll("circle")
         .data(airports)
