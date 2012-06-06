@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Migrants</title>
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+    <style type="text/css">
+
+#countries path {
+  fill: #ccc;
+  stroke: #fff;
+}
+
+path.arc {
+  pointer-events: none;
+  fill: none;
+  stroke: #000;
+  display: none;
+  stroke-width: 0.5;
+}
+
+path.cell {
+  fill: none;
+  pointer-events: all;
+}
+
+circle {
+  fill: steelblue;
+  fill-opacity: .8;
+  stroke: #fff;
+}
+
+#cells.voronoi path.cell {
+  stroke: brown;
+}
+
+#cells g:hover path.arc {
+  display: inherit;
+}
+
+    </style>
+  </head>
+  <body>
+     <h2>
+      Migrants from <span>Country</span><br>
+	  IFAD 2007<br>
+    </h2>
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <script type="text/javascript" src="d3/d3.csv.js"></script>
+    <script type="text/javascript" src="d3/d3.geo.js"></script>
+	<script type="text/javascript" src="d3/d3.geom.js"></script>
+    <script type="text/javascript">
+
+var w = 1280,
+    h = 800;
+
+var xy = d3.geo.mercator(),
+    path = d3.geo.path().projection(xy);
+
+var svg = d3.select("body").insert("svg:svg", "h2")
+    .attr("width", w)
+    .attr("height", h);
+
+var countries = svg.append("svg:g")
+    .attr("id", "countries");
+
+var circles = svg.append("svg:g")
+    .attr("id", "circles");
+
+var cells = svg.append("svg:g")
+    .attr("id", "cells");
+    
+var equator = d3.select("svg")
+  .append("line")
+    .attr("x1", "0%")
+    .attr("x2", "100%");
+
+d3.select("input[type=checkbox]").on("change", function() {
+  cells.classed("voronoi", this.checked);
+});
+
+d3.json("data/world-countries.json", function(collection) {
+  var removed = collection.features.splice(6,1);
+  countries.selectAll("path")
+      .data(collection.features)
+    .enter().append("svg:path")
+      .attr("d", path);
+      
+  equator
+      .attr("y1", xy([0, 0])[1])
+      .attr("y2", xy([0, 0])[1]);
+
+});
+
+d3.csv("data/migrants.csv", function(flights) {
+  var linksByOrigin = {},
+      countByAirport = {},
+      sumByAirport = {},
+      locationByAirport = {},
+      positions = [];
+
+  var arc = d3.geo.greatArc()
+      .source(function(d) { return locationByAirport[d.source]; })
+      .target(function(d) { return locationByAirport[d.target]; });
+
+  flights.forEach(function(flight) {
+    var origin = flight.OriginCode,
+        destination = flight.DestCode,
+		amnt = flight.Migrants,
+        links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
+    links.push({source: origin, target: destination, amount: parseInt(amnt)});
+    countByAirport[origin] = (countByAirport[origin] || 0) + 1;
+    sumByAirport[origin] = (sumByAirport[origin] || 0) + parseInt(flight.Migrants);
+    countByAirport[destination] = (countByAirport[destination] || 0) + 1;
+    sumByAirport[destination] = (sumByAirport[destination] || 0) + parseInt(flight.Migrants);
+  });
+
+  d3.csv("data/country-locations.csv", function(airports) {
+
+    // Only consider airports with at least one flight.
+    airports = airports.filter(function(airport) {
+      if (sumByAirport[airport.Code]) {
+        var location = [+airport.longitude, +airport.latitude];
+        locationByAirport[airport.Code] = location;
+        positions.push(xy(location));
+        return true;
+      }
+    });
+
+    // Compute the Voronoi diagram of airports' projected positions.
+    var polygons = d3.geom.voronoi(positions);
+
+    var g = cells.selectAll("g")
+        .data(airports)
+      .enter().append("svg:g");
+
+    g.append("svg:path")
+        .attr("class", "cell")
+        .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
+        .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
+
+    g.selectAll("path.arc")
+        .data(function(d) { return linksByOrigin[d.OriginCode] || []; })
+      .enter().append("svg:path")
+        .attr("class", "arc")
+        .attr("d", function(d) { return path(arc(d)); })
+		.style("stroke-width", function(w) { return Math.sqrt(w.amount)*0.05;} );
+
+    circles.selectAll("circle")
+        .data(airports)
+      .enter().append("svg:circle")
+        .attr("cx", function(d, i) { return positions[i][0]; })
+        .attr("cy", function(d, i) { return positions[i][1]; })
+        .attr("r", function(d, i) { console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByAirport[d.Code])); return Math.sqrt(sumByAirport[d.Code]) * 0.005; })
+        .sort(function(a, b) { return sumByAirport[b.Code] - sumByAirport[a.Code]; })
+        .attr("title", function(d, i) { return d.Code; });
+  });
+});
+
+    </script>
+  </body>
+</html>
