@@ -3,41 +3,7 @@
   <head>
   <title>Remittances - Origins</title>
     <link type="text/css" rel="stylesheet" href="style.css"/>
-    <style type="text/css">
-
-#countries path {
-  fill: #ccc;
-  stroke: #fff;
-}
-
-path.arc {
-  pointer-events: none;
-  fill: none;
-  stroke: #000;
-  display: none;
-  stroke-width: 0.5;
-}
-
-path.cell {
-  fill: none;
-  pointer-events: all;
-}
-
-circle {
-  fill: steelblue;
-  fill-opacity: .8;
-  stroke: #fff;
-}
-
-#cells.voronoi path.cell {
-  stroke: brown;
-}
-
-#cells g:hover path.arc {
-  display: inherit;
-}
-
-    </style>
+    <link type="text/css" rel="stylesheet" href="remittances.css"/>
   </head>
   <body>
      <h2>
@@ -85,9 +51,9 @@ d3.json("data/world-countries.json", function(collection) {
     .enter().append("svg:path")
       .attr("d", path);
       
-  equator
+ /* equator
       .attr("y1", xy([0, 0])[1])
-      .attr("y2", xy([0, 0])[1]);
+      .attr("y2", xy([0, 0])[1]);*/
 
 });
 
@@ -151,7 +117,7 @@ d3.csv("data/host-target2.csv", function(flights) {
       .enter().append("svg:circle")
         .attr("cx", function(d, i) { return positions[i][0]; })
         .attr("cy", function(d, i) { return positions[i][1]; })
-        .attr("r", function(d, i) { console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByOrigin[d.Code])); return Math.sqrt(sumByOrigin[d.Code]) * 0.00005; })
+        .attr("r", function(d, i) { console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByOrigin[d.Code])); return Math.sqrt(sumByOrigin[d.Code]) * 0.0001; })
         .sort(function(a, b) { return sumByOrigin[b.Code] - sumByOrigin[a.Code]; })
         .attr("title", function(d, i) { return d.Code; });
   });

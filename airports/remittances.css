@@ -1,0 +1,42 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+background-color:#333;
+}
+
+#countries path {
+	fill: none;
+  stroke: #111;
+  stroke-width: 0.25;
+  opacity: 50%;
+}
+
+path.arc {
+  pointer-events: none;
+  fill: none;
+  stroke: steelblue;
+  display: none;
+  stroke-width: 0.5;
+  opacity: 0.8;
+}
+
+path.cell {
+  fill: none;
+  pointer-events: all;
+}
+
+circle {
+  fill: steelblue;
+  fill-opacity: .8;
+  stroke: #111;
+  stroke-width: 0.25;
+}
+
+#cells.voronoi path.cell {
+  stroke: brown;
+}
+
+#cells g:hover path.arc {
+  display: inherit;
+}
