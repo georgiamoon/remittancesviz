@@ -6,18 +6,18 @@
     <link type="text/css" rel="stylesheet" href="remittances.css"/>
   </head>
   <body>
-     <h2>
-      Remittances from <span>Country</span><br>
-	  Data is in $USD, IFAD 2007<br>
-    </h2>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
     <script type="text/javascript" src="d3/d3.geo.js"></script>
 	<script type="text/javascript" src="d3/d3.geom.js"></script>
-    <script type="text/javascript">
+  <h2>
+      Remittances from <span>Country</span><br>
+	  Data is in $USD, IFAD 2007<br>
+    </h2>
+<script type="text/javascript">
 
-var w = 1280,
-    h = 800;
+var w = 800,
+    h = 600;
 
 var xy = d3.geo.mercator(),
     path = d3.geo.path().projection(xy);
@@ -50,14 +50,9 @@ d3.json("data/world-countries.json", function(collection) {
       .data(collection.features)
     .enter().append("svg:path")
       .attr("d", path);
-      
- /* equator
-      .attr("y1", xy([0, 0])[1])
-      .attr("y2", xy([0, 0])[1]);*/
-
 });
 
-d3.csv("data/host-target2.csv", function(flights) {
+d3.csv("data/host-target3.csv", function(flights) {
   var linksByOrigin = {},
       countByAirport = {},
       sumByOrigin = {},
@@ -68,12 +63,7 @@ d3.csv("data/host-target2.csv", function(flights) {
   var arc = d3.geo.greatArc()
       .source(function(d) { return locationByAirport[d.source]; })
       .target(function(d) { return locationByAirport[d.target]; });
-      
- var line = d3.svg.line()
-    .x(function(d) { return locationByAirport[d.source]; })
-   // .y1(function(d) { return locationByAirport[d.source]; })
-   // .x2(function(d) { return locationByAirport[d.target]; })
-    .y(function(d) { return locationByAirport[d.target]; });
+
 
  flights.forEach(function(flight) {
     var origin = flight.HostCode,
@@ -111,13 +101,12 @@ d3.csv("data/host-target2.csv", function(flights) {
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
         .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
 
-    g.selectAll("path.line")
-        .data(function(d) { return linksByOrigin[d.Code] || []; })
+   /* g.selectAll("path.arc")
+        .data(function(d) { return linksByOrigin[d.source] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
-//        .attr("d", function(d) { return line(d) + "Z"; })
         .attr("d", function(d) { return path(arc(d)); })
-		.style("stroke-width", function(w) { return Math.sqrt(w.amount)*0.00005;} );
+		.style("stroke-width", function(d) { return Math.sqrt(d.amount)*0.00005;} );*/
 
     circles.selectAll("circle")
         .data(airports)
