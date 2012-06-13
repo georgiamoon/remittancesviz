@@ -68,6 +68,12 @@ d3.csv("data/host-target2.csv", function(flights) {
   var arc = d3.geo.greatArc()
       .source(function(d) { return locationByAirport[d.source]; })
       .target(function(d) { return locationByAirport[d.target]; });
+      
+ var line = d3.svg.line()
+    .x(function(d) { return locationByAirport[d.source]; })
+   // .y1(function(d) { return locationByAirport[d.source]; })
+   // .x2(function(d) { return locationByAirport[d.target]; })
+    .y(function(d) { return locationByAirport[d.target]; });
 
  flights.forEach(function(flight) {
     var origin = flight.HostCode,
@@ -105,10 +111,11 @@ d3.csv("data/host-target2.csv", function(flights) {
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
         .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
 
-    g.selectAll("path.arc")
+    g.selectAll("path.line")
         .data(function(d) { return linksByOrigin[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
+//        .attr("d", function(d) { return line(d) + "Z"; })
         .attr("d", function(d) { return path(arc(d)); })
 		.style("stroke-width", function(w) { return Math.sqrt(w.amount)*0.00005;} );
 
