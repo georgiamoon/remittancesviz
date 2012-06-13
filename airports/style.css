@@ -1,8 +1,6 @@
 body {
   font: 300 36px "Helvetica Neue";
   height: 640px;
-  margin: 80px 160px 80px 160px;
-  overflow: hidden;
   position: relative;
   width: 960px;
 }
@@ -46,7 +44,7 @@ h1, h2, h3 {
 }
 
 h2, h3 {
-  text-align: right;
+  text-align: left;
   font-size: inherit;
   position: absolute;
   top: 0;
@@ -94,7 +92,6 @@ h3 {
 }
 
 body > svg {
-  position: absolute;
-  top: -80px;
-  left: -160px;
+  position:relative;
+  overflow: scroll;
 }
