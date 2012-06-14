@@ -7,8 +7,9 @@
   </head>
   <body>
 <strong>REMITTANCES BY COUNTRY OF DESTINATION</strong><br/>
-  <h2><span1>Country</span1> receives $<span2>amount</span2></h2>
-  <h3>List</h3>
+  <h2><img height="30px"> <span1>Country</span1> receives $<span2>amount</span2></h2>
+   <h3>To the following countries:<br/>
+  <span3>LIST OF COUNTRIES</span3></h3>
     <div id="map" class="main" width="1280px" height="800px"></div>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
@@ -123,6 +124,7 @@ d3.csv("data/host-target3.csv", function(flights) {
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
         .on("mouseover", function(d, i) { 
+        	d3.select("img").attr("src", d.flag);
         	d3.select("h2 span1").text(d.Country); 
         	d3.select("h2 span2").text(addCommas(sumByDest[d.Code])); 
         });
