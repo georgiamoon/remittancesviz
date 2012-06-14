@@ -125,8 +125,7 @@ d3.csv("data/host-target3.csv", function(flights) {
         .on("mouseover", function(d, i) { 
         	d3.select("img").attr("src", d.flag);
         	d3.select("h2 span1").text(d.Country); 
-        	d3.select("h2 span2").text(addCommas(sumByOrigin[d.Code])
-        );
+        	d3.select("h2 span2").text(addCommas(sumByOrigin[d.Code]));
         });
 
     g.selectAll("path.arc")
