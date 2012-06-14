@@ -16,6 +16,19 @@
 	<script type="text/javascript" src="d3/d3.geom.js"></script>
   <script type="text/javascript">
 
+function addCommas(nStr)
+{
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2');
+	}
+	return x1 + x2;
+}
+
 var w = 1280,
     h = 800;
 
@@ -108,9 +121,11 @@ d3.csv("data/host-target3.csv", function(flights) {
     g.append("svg:path")
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
-        .on("mouseover", function(d, i) { d3.select("h2 span1").text(d.Country); d3.select("h2 span2").text(sumByOrigin[d.Code]); })
-        //.on("mouseover", function(d, i) { d3.select("h3").text(linksByOrigin[d.Code]); })
-        ;
+        .on("mouseover", function(d, i) { 
+        	d3.select("h2 span1").text(d.Country); 
+        	d3.select("h2 span2").text(addCommas(sumByOrigin[d.Code]));
+        	//d3.select("h3").text(linksByOrigin[d.Code]);
+        });
 
     g.selectAll("path.arc")
         .data(function(d) { return linksByOrigin[d.Code] || []; })
