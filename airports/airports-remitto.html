@@ -3,28 +3,29 @@
   <head>
   <title>Remittances - Destinations</title>
     <link type="text/css" rel="stylesheet" href="style.css"/>
-     <link type="text/css" rel="stylesheet" href="remittances.css"/>
+    <link type="text/css" rel="stylesheet" href="remittances.css"/>
   </head>
   <body>
      <h2>
       Remittances to <span>Country</span><br>
 	  Data is in $USD, IFAD 2007<br>
     </h2>
+    <div id="map" class="main" width="1280px" height="800px"></div>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
     <script type="text/javascript" src="d3/d3.geo.js"></script>
-	<script type="text/javascript" src="d3/d3.geom.js"></script>
+    <script type="text/javascript" src="d3/d3.geom.js"></script>
     <script type="text/javascript">
 
 var w = 1280,
     h = 800;
 
-var xy = d3.geo.mercator(),
+var xy = d3.geo.mercator().scale(700).translate([530, 400]),
     path = d3.geo.path().projection(xy);
 
-var svg = d3.select("body").insert("svg:svg", "h2")
-    .attr("width", w)
-    .attr("height", h);
+var svg = d3.select("#map").insert("svg:svg")
+    .attr("width", w+'px')
+    .attr("height", h+'px');
 
 var countries = svg.append("svg:g")
     .attr("id", "countries");
@@ -57,29 +58,36 @@ d3.json("data/world-countries.json", function(collection) {
 
 });
 
-d3.csv("data/host-target2.csv", function(flights) {
+d3.csv("data/host-target3.csv", function(flights) {
   var linksByDest = {},
       countByAirport = {},
-      sumByOrigin = {},
-	  sumByDest = {},
+      sumByOrigin = {}, 
+      sumByDest = {},
       locationByAirport = {},
-      positions = [];
+      positions = [],
+      minAmount = 0,
+      maxAmount = 25;
 
-  var arc = d3.geo.greatArc()
+    var arc = d3.geo.greatArc()
       .source(function(d) { return locationByAirport[d.target]; })
       .target(function(d) { return locationByAirport[d.source]; });
-
+  
  flights.forEach(function(flight) {
     var origin = flight.HostCode,
         destination = flight.TargetCode,
-		amnt = flight.Amount,
+        amnt = flight.Amount,
         links = linksByDest[destination] || (linksByDest[destination] = []);
+    maxAmount = Math.max(maxAmount, amnt);
+    minAmount = Math.min(minAmount, amnt);
     links.push({source: origin, target: destination, amount: parseInt(amnt)});
     countByAirport[origin] = (countByAirport[origin] || 0) + 1;
     sumByOrigin[origin] = (sumByOrigin[origin] || 0) + parseInt(flight.Amount);
     countByAirport[destination] = (countByAirport[destination] || 0) + 1;
     sumByDest[destination] = (sumByDest[destination] || 0) + parseInt(flight.Amount);
   });
+
+  var amountScale = d3.scale.linear().domain([minAmount,maxAmount]).range([1,25]);
+
 
   d3.csv("data/country-locations.csv", function(airports) {
 
@@ -104,20 +112,26 @@ d3.csv("data/host-target2.csv", function(flights) {
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
         .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
-
+    
     g.selectAll("path.arc")
         .data(function(d) { return linksByDest[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
         .attr("d", function(d) { return path(arc(d)); })
-		.style("stroke-width", function(w) { return Math.sqrt(w.amount)*0.00005;} );
+		.style("stroke-width", function(w) { 
+				return amountScale(w.amount); 
+	});
 
+    amountScale.range([2,12]);
     circles.selectAll("circle")
         .data(airports)
       .enter().append("svg:circle")
         .attr("cx", function(d, i) { return positions[i][0]; })
         .attr("cy", function(d, i) { return positions[i][1]; })
-        .attr("r", function(d, i) { console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByDest[d.Code])); return Math.sqrt(sumByDest[d.Code]) * 0.00005; })
+        .attr("r", function(d, i) { 
+             //console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByDest[d.Code])); 
+             return amountScale(sumByDest[d.Code]); 
+        })
         .sort(function(a, b) { return sumByDest[b.Code] - sumByDest[a.Code]; })
         .attr("title", function(d, i) { return d.Code; });
   });
