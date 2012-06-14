@@ -6,10 +6,9 @@
     <link type="text/css" rel="stylesheet" href="remittances.css"/>
   </head>
   <body>
-     <h2>
-      Remittances to <span>Country</span><br>
-	  Data is in $USD, IFAD 2007<br>
-    </h2>
+<strong>REMITTANCES BY COUNTRY OF DESTINATION</strong><br/>
+  <h2><span1>Country</span1> receives $<span2>amount</span2></h2>
+  <h3>List</h3>
     <div id="map" class="main" width="1280px" height="800px"></div>
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.csv.js"></script>
@@ -20,7 +19,7 @@
 var w = 1280,
     h = 800;
 
-var xy = d3.geo.mercator().scale(700).translate([530, 400]),
+var xy = d3.geo.mercator().scale(750).translate([450, 300]),
     path = d3.geo.path().projection(xy);
 
 var svg = d3.select("#map").insert("svg:svg")
@@ -36,10 +35,7 @@ var circles = svg.append("svg:g")
 var cells = svg.append("svg:g")
     .attr("id", "cells");
     
-var equator = d3.select("svg")
-  .append("line")
-    .attr("x1", "0%")
-    .attr("x2", "100%");
+var line = d3.svg.line();
 
 d3.select("input[type=checkbox]").on("change", function() {
   cells.classed("voronoi", this.checked);
@@ -51,10 +47,6 @@ d3.json("data/world-countries.json", function(collection) {
       .data(collection.features)
     .enter().append("svg:path")
       .attr("d", path);
-      
-  equator
-      .attr("y1", xy([0, 0])[1])
-      .attr("y2", xy([0, 0])[1]);
 
 });
 
@@ -65,9 +57,11 @@ d3.csv("data/host-target3.csv", function(flights) {
       sumByDest = {},
       locationByAirport = {},
       positions = [],
-      minAmount = 0,
-      maxAmount = 25;
-
+      minAmountArc = 0,
+      maxAmountArc = 25,
+      minAmountCircle = 0,
+      maxAmountCircle = 25;
+      
     var arc = d3.geo.greatArc()
       .source(function(d) { return locationByAirport[d.target]; })
       .target(function(d) { return locationByAirport[d.source]; });
@@ -77,16 +71,20 @@ d3.csv("data/host-target3.csv", function(flights) {
         destination = flight.TargetCode,
         amnt = flight.Amount,
         links = linksByDest[destination] || (linksByDest[destination] = []);
-    maxAmount = Math.max(maxAmount, amnt);
-    minAmount = Math.min(minAmount, amnt);
+    maxAmountArc = Math.max(maxAmountArc, amnt);
+    minAmountArc = Math.min(minAmountArc, amnt);
     links.push({source: origin, target: destination, amount: parseInt(amnt)});
     countByAirport[origin] = (countByAirport[origin] || 0) + 1;
     sumByOrigin[origin] = (sumByOrigin[origin] || 0) + parseInt(flight.Amount);
     countByAirport[destination] = (countByAirport[destination] || 0) + 1;
     sumByDest[destination] = (sumByDest[destination] || 0) + parseInt(flight.Amount);
+    maxAmountCircle = Math.max(maxAmountCircle, sumByDest[destination]);
+    minAmountCircle = Math.min(minAmountCircle, sumByDest[destination]);
+
   });
 
-  var amountScale = d3.scale.linear().domain([minAmount,maxAmount]).range([1,25]);
+  var amountScaleArc = d3.scale.sqrt().domain([minAmountArc,maxAmountArc]).range([0,25]);
+  var amountScaleCircle = d3.scale.sqrt().domain([minAmountCircle,maxAmountCircle]).range([1,25]);
 
 
   d3.csv("data/country-locations.csv", function(airports) {
@@ -111,18 +109,19 @@ d3.csv("data/host-target3.csv", function(flights) {
     g.append("svg:path")
         .attr("class", "cell")
         .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
-        .on("mouseover", function(d, i) { d3.select("h2 span").text(d.Country); });
+        .on("mouseover", function(d, i) { d3.select("h2 span1").text(d.Country); d3.select("h2 span2").text(sumByDest[d.Code]); });
     
     g.selectAll("path.arc")
         .data(function(d) { return linksByDest[d.Code] || []; })
       .enter().append("svg:path")
         .attr("class", "arc")
-        .attr("d", function(d) { return path(arc(d)); })
+        //.attr("d", function(d) { return path(arc(d)); })
+		.attr("d", function (d) { 
+             return line([[xy(locationByAirport[d.source]),xy(locationByAirport[d.target])]]) +"Z"; })
 		.style("stroke-width", function(w) { 
-				return amountScale(w.amount); 
+				return amountScaleArc(w.amount); 
 	});
-
-    amountScale.range([2,12]);
+	
     circles.selectAll("circle")
         .data(airports)
       .enter().append("svg:circle")
@@ -130,7 +129,7 @@ d3.csv("data/host-target3.csv", function(flights) {
         .attr("cy", function(d, i) { return positions[i][1]; })
         .attr("r", function(d, i) { 
              //console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByDest[d.Code])); 
-             return amountScale(sumByDest[d.Code]); 
+             return amountScaleCircle(sumByDest[d.Code]); 
         })
         .sort(function(a, b) { return sumByDest[b.Code] - sumByDest[a.Code]; })
         .attr("title", function(d, i) { return d.Code; });
@@ -138,5 +137,8 @@ d3.csv("data/host-target3.csv", function(flights) {
 });
 
     </script>
+        <div>
+    <h6>All values in U.S. Dollars, Source: IFAD 2007</h6>
+    </div>
   </body>
 </html>

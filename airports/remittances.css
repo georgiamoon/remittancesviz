@@ -2,23 +2,24 @@
 /* CSS Document */
 
 body {
-background-color:#333;
+background-color:#222222;
+color: #ffffff;
 }
 
 #countries path {
-	fill: none;
-  stroke: #111;
+  fill: #252525;
+  stroke: #222; 
   stroke-width: 0.25;
-  opacity: 25%;
+  //opacity: 25%;
 }
 
 path.arc {
   pointer-events: none;
   fill: none;
-  stroke: steelblue;
+  stroke: #0099FF;
   display: none;
   stroke-width: 0.5;
-  opacity: 0.8;
+  opacity: 0.5;
 }
 
 path.cell {
@@ -27,14 +28,10 @@ path.cell {
 }
 
 circle {
-  fill: steelblue;
-  fill-opacity: .8;
+  fill: #0099FF;
+  fill-opacity: .5;
   stroke: #111;
-  stroke-width: 0.25;
-}
-
-#cells.voronoi path.cell {
-  stroke: brown;
+  stroke-width: 0.1;
 }
 
 #cells g:hover path.arc {
