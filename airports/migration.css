@@ -16,7 +16,7 @@ color: #ffffff;
 path.arc {
   pointer-events: none;
   fill: none;
-  stroke: #33D633;
+  stroke: #0099FF;
   display: none;
   stroke-width: 0.5;
   opacity: 0.5;
@@ -28,7 +28,7 @@ path.cell {
 }
 
 circle {
-  fill: #33D633;
+  fill: #0099FF;
   fill-opacity: .5;
   stroke: #111;
   stroke-width: 0.1;
