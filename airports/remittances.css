@@ -27,6 +27,18 @@ path.cell {
   pointer-events: all;
 }
 
+text.label {
+	pointer-events: none;
+	display: none;
+	fill: #FFFFFF;
+	font-size: 10px;
+}
+
+text.cell {
+	fill:none;
+	pointer-events: all;
+}
+
 circle {
   fill: #33D633;
   fill-opacity: .5;
@@ -35,5 +47,9 @@ circle {
 }
 
 #cells g:hover path.arc {
+  display: inherit;
+}
+
+#cells g:hover text.label {
   display: inherit;
 }
