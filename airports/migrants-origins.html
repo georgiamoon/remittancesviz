@@ -173,7 +173,7 @@ d3.csv("data/migrants.csv", function(flights) {
 	
 	g.selectAll("text.label")
 	    .data(function(d) {
-	        return linksByOrigin[d.Code].slice(0,10);
+	        return linksByOrigin[d.Code].slice(0,3);
 	     })
 	     .enter().append("svg:text")
 	     	.attr("x", function(d) { 
