@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+  <meta charset="utf-8"/>
   <title>Remittances - Origins</title>
     <link type="text/css" rel="stylesheet" href="style.css"/>
     <link type="text/css" rel="stylesheet" href="remittances.css"/>
@@ -93,8 +94,8 @@ d3.csv("data/host-target2010.csv", function(flights) {
 
 
  flights.forEach(function(flight) {
-    var origin = flight.HostCode,
-        destination = flight.TargetCode,
+    var origin = flight.HostCode.trim(),
+        destination = flight.TargetCode.trim(),
 		amnt = flight.Amount,
         links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
     maxAmountArc = Math.max(maxAmountArc, amnt);
