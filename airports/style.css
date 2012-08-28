@@ -1,5 +1,6 @@
 body {
-  font: 300 24px "Helvetica Neue";
+  background-image: url('http://thereandhere.org/images/there_here_bg.png');
+  font-family: Helvetica, Arial, sans-serif;
   height: 640px;
   position: absolute;
   width: 960px;
