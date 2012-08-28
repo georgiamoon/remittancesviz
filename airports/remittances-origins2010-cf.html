@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8"/>
+  <title>Remittances - Origins</title>
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+    <link type="text/css" rel="stylesheet" href="remittances.css"/>
+  </head>
+  <body>
+<strong>REMITTANCES BY COUNTRY OF ORIGIN</strong><br/>
+<span style="font-size:10px;"><em>The visualization may take a moment to load.</em><br/></span>
+  <div>
+  <h2>Origin: <img height="30px"> <span1>Country</span1> - $<span2></span2></h2>
+  <!--<h3> To the following countries:<br/></h3>-->
+  </div>
+ <div id="map" class="main" width="1280px" float="right"></div>
+<div>
+<h6>All values in U.S. Dollars, Source: Remittances Amounts: IFAD 2007, Migration Data: World Bank 2010</h6>
+</div>
+
+<script type="text/javascript" src="d3/d3.js"></script>
+<script type="text/javascript" src="d3/d3.csv.js"></script>
+<script type="text/javascript" src="d3/d3.geo.js"></script>
+<script type="text/javascript" src="d3/d3.geom.js"></script>
+<script type="text/javascript" src="crossfilter.js"></script>
+<script type="text/javascript">
+
+function addCommas(nStr) {
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2');
+	}
+	return x1 + x2;
+}
+
+function include(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
+//items for SVG
+var w = 1280,
+    h = 500;
+
+var xy = d3.geo.mercator().scale(800).translate([650, 300]),
+    path = d3.geo.path().projection(xy);
+
+var svg = d3.select("#map").insert("svg:svg")
+    .attr("width", w+'px')
+    .attr("height", h+'px');
+
+var countries = svg.append("svg:g")
+    .attr("id", "countries");
+
+var circles = svg.append("svg:g")
+    .attr("id", "circles");
+
+var cells = svg.append("svg:g")
+    .attr("id", "cells");
+    
+
+d3.select("input[type=checkbox]").on("change", function() {
+  cells.classed("voronoi", this.checked);
+});
+
+d3.json("data/world-countries.json", function(collection) {
+  var removed = collection.features.splice(6,1);
+  countries.selectAll("path")
+      .data(collection.features)
+    .enter().append("svg:path")
+      .attr("d", path);
+});
+
+d3.csv("data/host-target2010.csv", function(flights) {
+	var remittances = crossfilter([flights]);
+});
+console.log(remittances);
+
+
+ /*   
+   	// Compute the Voronoi diagram of airports' projected positions.
+    var polygons = d3.geom.voronoi(positions);
+
+	
+	//SVG make up
+    var g = cells.selectAll("g")
+        .data(airports)
+      .enter().append("svg:g");
+    
+    
+    g.append("svg:path")
+        .attr("class", "cell")
+        .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
+        .on("mouseover", function(d, i) { 
+        	d3.select("img").attr("src", d.flag);
+        	d3.select("h2 span1").text(d.Country); 
+        	d3.select("h2 span2").text(addCommas(sumByOrigin[d.Code]));
+         });
+        
+    g.selectAll("path.arc")
+        .data(function(d) { 
+        	return linksByOrigin[d.Code] || []; 
+        })
+      .enter().append("svg:path")
+        .attr("class", "arc")
+   		.attr("d", function (d) { 
+             return line([[xy(locationByAirport[d.source]), xy(locationByAirport[d.target])]]) +"Z"; 
+         })
+		.style("stroke-width", function(w) { return amountScaleArc(w.amount); });
+	
+	circles.selectAll("circle")
+        .data(airports)
+      .enter().append("svg:circle")
+        .attr("cx", function(d, i) { return positions[i][0]; })
+        .attr("cy", function(d, i) { return positions[i][1]; })
+        .attr("r", function(d, i) { 
+        	//console.log("code: "+ d.Code + ", sqrt: " + Math.sqrt(sumByOrigin[d.Code])); 
+        	return amountScaleCircle(sumByOrigin[d.Code]);  
+        })
+        .sort(function(a, b) { return sumByOrigin[b.Code] - sumByOrigin[a.Code]; })
+        .attr("title", function(d, i) { return d.Code; });   
+ 
+	var m = -10;
+	g.selectAll("text.label")
+	    .data(function(d) {
+	        return linksByOrigin[d.Code].slice(0,3);
+	     })
+	     .enter().append("svg:text")
+	     	.attr("x", function(d) { 
+	     		var pSrc = locationByAirport[d.source];
+	     	    var pDst = locationByAirport[d.target];
+	     	    unitvec = unitVector(pSrc, pDst);	
+				return xy(locationByAirport[d.target])[0] + unitvec[0] * m - amountScaleText(d.amount) * 5 ; 
+			 })
+			.attr("y", function(d) { 
+			    var pSrc = locationByAirport[d.source];
+	     	    var pDst = locationByAirport[d.target];
+	     	    unitvec = unitVector(pSrc, pDst);
+			    return xy(locationByAirport[d.target])[1] + unitvec[1] * m; })
+	     	.attr("class", "label")
+	     	.style("font-size", function(d) { 
+	     		return  amountScaleText(d.amount); })
+	     	.text(function(d) { 
+	     	    return airports.filter(function(a) { return a.Code == d.target; })[0].Country + "- $" + addCommas(d.amount);
+	     	 });
+	
+	g.selectAll("text.list")
+	    .data(function(d) {
+	        return linksByOrigin[d.Code].slice(0,20);
+	     })	     
+	     .enter().append("svg:text")
+	     	.attr("x", 15)
+			.attr("y", function(d,i) { return i * 20 + 50;})
+	     	.attr("class", "list")
+	     	.text(function(d) { 
+	     	    return airports.filter(function(a) { return a.Code == d.target; })[0].Country + "- $" + addCommas(d.amount);
+	     	 }); 	
+	     
+ //    });
+//});*/
+
+    </script>
+    </body>
+</html>
